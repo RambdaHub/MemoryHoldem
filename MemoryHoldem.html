@@ -111,6 +111,7 @@ button:disabled{cursor:not-allowed;opacity:.38}
 .ai-meta{flex:1;min-width:0}
 .ai-name{font-family:var(--display);font-weight:700;letter-spacing:.12em;font-size:14px;color:#ff9ab5}
 .ai-sub{font-size:11px;color:var(--muted)}
+.ai-name .badge{display:table;margin:4px 0 0;white-space:nowrap}
 .speech{margin-top:10px;position:relative;background:rgba(227,38,92,.08);border:1px solid rgba(227,38,92,.3);border-radius:10px;padding:9px 12px;font-size:13px;min-height:38px;line-height:1.45}
 .speech::before{content:'';position:absolute;top:-6px;left:20px;width:10px;height:10px;background:#1b1418;border-left:1px solid rgba(227,38,92,.3);border-top:1px solid rgba(227,38,92,.3);transform:rotate(45deg)}
 .speech.pop{animation:pop .35s ease}
@@ -312,6 +313,28 @@ svg.sv,svg.pip{display:block;fill:currentColor}
 .guide-foot{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6}
 .final{text-align:center}
 .final .big{font-family:var(--display);font-size:40px;font-weight:900;letter-spacing:.1em;margin:8px 0}
+/* ---------- Peek / Street / Reactions ---------- */
+.peek-btn{flex:none;padding:12px 11px;font-size:16px;gap:4px}
+.peek-btn small{font-size:11px}
+.peek-btn.on{background:rgba(212,175,55,.22);box-shadow:0 0 0 1px var(--gold2) inset,0 0 16px rgba(212,175,55,.35)}
+.peek-info{font-size:11.5px;color:var(--muted);text-align:center;margin-top:7px}
+.peek-info b{color:var(--gold2)}
+.peek-info.on{color:var(--gold2);font-weight:700}
+.grid.peek-mode .card{cursor:zoom-in}
+.grid.peek-mode .card:hover::after{border-color:rgba(243,215,122,.8)}
+.card.peeking::after{border-color:var(--gold2)!important;box-shadow:0 0 22px rgba(243,215,122,.95)!important}
+.street{display:flex;justify-content:center;gap:6px;margin-bottom:8px}
+.street span{font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;color:var(--muted);background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06)}
+.street span.on{color:#1a1405;background:linear-gradient(180deg,var(--gold2),var(--gold));border-color:var(--gold2)}
+.ai-box{position:relative}
+.react-bar{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:10px}
+.react-bar button{font-size:18px;line-height:1;padding:7px 0;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);transition:transform .12s,opacity .2s,background .2s}
+.react-bar button:hover{transform:scale(1.15);background:rgba(212,175,55,.12)}
+.react-bar.cool button{opacity:.35;pointer-events:none}
+.react-toggle{display:none}
+.float-emo{position:fixed;z-index:70;pointer-events:none;font-size:46px;line-height:1;transform:translate(-50%,-50%);animation:floatEmo 1.9s ease-out forwards;filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+@keyframes floatEmo{0%{opacity:0;transform:translate(-50%,-30%) scale(.4)}14%{opacity:1;transform:translate(-50%,-60%) scale(1.2)}28%{transform:translate(-50%,-70%) scale(1)}100%{opacity:0;transform:translate(-50%,-190%) scale(1)}}
+.rule-pick{grid-template-columns:1fr 1fr}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);opacity:0;z-index:60;background:#1a2428;border:1px solid var(--gold);color:var(--gold2);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;transition:all .3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 
@@ -357,6 +380,13 @@ svg.sv,svg.pip{display:block;fill:currentColor}
   .guide-list .ex{grid-column:1 / -1}
   .guide-list .ex .card{width:calc((100% - 12px)/5);max-width:40px}
   .modal-box{padding:16px}
+  .ai-box{z-index:25}
+  .react-toggle{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;font-size:18px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+  .react-bar{position:absolute;right:6px;top:calc(100% + 6px);z-index:30;margin:0;width:208px;grid-template-columns:repeat(4,1fr);padding:6px;
+    background:#141e22;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.6);display:none}
+  .react-bar.open{display:grid}
+  .react-bar button{font-size:22px;padding:8px 0}
+  .peek-btn{padding:10px 8px}
 }
 @media (max-width:980px) and (max-height:720px){
   .controls{padding:8px}
@@ -425,6 +455,8 @@ svg.sv,svg.pip{display:block;fill:currentColor}
         <div class="ai-picks" id="aiPicks"><i class="mini-back"></i><i class="mini-back"></i></div>
       </div>
       <div class="speech" id="speech">어서 오세요. 기억은 무기이자 함정입니다.</div>
+      <button class="react-toggle" id="reactToggle" aria-label="리액션">😀</button>
+      <div class="react-bar" id="reactBar" aria-label="이모지 리액션"></div>
     </div>
 
     <div class="panel community">
@@ -460,7 +492,12 @@ svg.sv,svg.pip{display:block;fill:currentColor}
       <button data-d="normal" class="on"><b>보통</b><small>8초</small></button>
       <button data-d="hard"><b>어려움</b><small>5초</small></button>
     </div>
-    <div id="paneAi"><button class="btn gold wide" id="startBtn" style="padding:14px;font-size:16px">게임 시작</button></div>
+    <div class="diff-pick rule-pick" id="rulePick">
+      <button data-r="classic" class="on"><b>클래식</b><small>공유 3장 공개 · 베팅 1회</small></button>
+      <button data-r="double"><b>더블 베팅</b><small>공유 2장 → 베팅 → 1장 더 → 베팅</small></button>
+    </div>
+    <p class="note">👁 <b>엿보기</b> — 선택 단계에서 뒤집힌 카드 1장을 잠깐 확인. 라운드당 1회 · 게임당 3회 · 비용 40 → 80 → 120칩 (팟에 안 들어가고 사라져요)</p>
+    <div id="paneAi"><p class="note">🎭 AI 성격은 게임마다 랜덤 — 공격형 · 신중형 · 블러퍼 · 계산형 · 도박꾼</p><button class="btn gold wide" id="startBtn" style="padding:14px;font-size:16px">게임 시작</button></div>
     <div id="panePvp" hidden>
       <div id="pvpMenu">
         <button class="btn gold wide big" id="createBtn">방 만들기</button>
@@ -485,7 +522,7 @@ svg.sv,svg.pip{display:block;fill:currentColor}
       <button class="x" data-close>✕</button>
     </div>
     <ul class="guide-list" id="guideList"></ul>
-    <p class="guide-foot">같은 족보끼리는 높은 숫자(페어·트리플 등의 숫자 → 키커 순)로 비교합니다. A는 가장 높지만 A-2-3-4-5 스트레이트(휠)에서는 1로 쓰입니다. 무늬로는 우열을 가리지 않으며, 완전히 같으면 팟을 나눕니다.</p>
+    <p class="guide-foot">같은 족보끼리는 높은 숫자(페어·트리플 등의 숫자 → 키커 순)로 비교합니다. A는 가장 높지만 A-2-3-4-5 스트레이트(휠)에서는 1로 쓰입니다. 무늬로는 우열을 가리지 않으며, 완전히 같으면 팟을 나눕니다.<br>👁 엿보기: 선택 단계에서 카드 1장 확인 (라운드당 1회 · 게임당 3회 · 40/80/120칩 소모).<br>🔁 더블 베팅: 공유 카드 2장만 보고 선택 → 1차 베팅 → 3번째 공유 카드 공개 → 2차 베팅.</p>
   </div>
 </div>
 
@@ -549,8 +586,43 @@ const LINES = {
   win:['기억력은 결국 실력이죠.','제 기억이 더 선명했네요.'],
   lose:['…제 기억이 틀렸군요.','훌륭한 기억력이네요.'],
   tie:['동점이군요. 같은 기억이었나 봅니다.'],
-  bluffWin:['블러핑이었다는 건 비밀로 해 두죠.']
+  bluffWin:['블러핑이었다는 건 비밀로 해 두죠.'],
+  peek:['살짝 확인해 보죠.','한 장만 엿보겠습니다.'],
+  street:['한 장 더… 판이 바뀌었을까요?','이제 진짜 승부죠.']
 };
+
+/* 엿보기: 칩이 넉넉해도 남발하지 못하게 — 라운드당 1회, 게임당 3회, 비용 누진, 칩은 소멸 */
+const PEEK_MAX = 3, PEEK_COST = n => 40*(n+1);
+/* 규칙: 클래식(베팅 1회) / 더블(공유 2장 공개 후 1차 베팅 → 3번째 공개 → 2차 베팅) */
+const RULES = { classic:{label:'클래식', streets:1, maxRaises:4}, double:{label:'더블 베팅', streets:2, maxRaises:3} };
+const EMOS = ['👍','😂','😎','😱','🤔','🔥','😭','🙏'];
+
+/* AI 성격 — 게임마다 랜덤. 난이도는 기억력, 성격은 베팅 스타일 */
+const PERSONAS = [
+  { id:'shark', icon:'🦈', name:'THE SHARK', label:'공격형', raise:.12, size:1.3, bluff:1.4, loose:.02, peek:.35,
+    lines:{ memo:['피 냄새가 나는군요.','오늘은 사냥하는 날이죠.'], raise:['더 올리죠. 버틸 수 있겠어요?','물러서지 않습니다. 레이즈.'],
+      allin:['전부 겁니다. 도망칠 건가요?'], fold:['…이번만 봐 드리죠.'], win:['약한 쪽이 먹히는 법이죠.'], lose:['다음엔 물어뜯겠습니다.'],
+      peek:['사냥감은 확인하고 덮치죠.'] },
+    emo:{ win:['😎','🔥'], lose:['😤'], reply:['😏','🔥','😎'], allin:'🔥' } },
+  { id:'rock', icon:'🗿', name:'THE ROCK', label:'신중형', raise:-.08, size:.8, bluff:.35, loose:-.1, peek:.55,
+    lines:{ memo:['천천히, 확실하게 가죠.'], check:['체크. 서두르지 않습니다.'], call:['…확실할 때만 받습니다. 콜.'],
+      raise:['이건 확신이 있습니다. 레이즈.'], fold:['무리하지 않겠습니다. 다이.'], win:['인내가 이깁니다.'], lose:['계산이 어긋났군요.'],
+      peek:['확인은 습관입니다.'] },
+    emo:{ win:['🙂','👍'], lose:['😐'], reply:['🙂','👍'], allin:'😐' } },
+  { id:'joker', icon:'🃏', name:'THE JOKER', label:'블러퍼', raise:.05, size:1.1, bluff:2.6, loose:.06, peek:.2,
+    lines:{ memo:['진짜와 가짜, 구별할 수 있겠어요?'], raise:['레이즈~ 진짜일까요, 가짜일까요?','하하, 올리죠!'], call:['콜! 재밌어지는데요?'],
+      allin:['올인! 인생은 쇼죠!'], fold:['에이, 이번엔 접죠.'], win:['속았죠? 아니면 진짜였을까요?'], lose:['하하, 들켰네요!'],
+      bluffWin:['완벽한 연기였죠?'], peek:['쉿, 아무것도 못 본 척해 주세요.'] },
+    emo:{ win:['😂','🤡'], lose:['😂'], reply:['😂','🤡','😜'], allin:'🤡' } },
+  { id:'owl', icon:'🦉', name:'THE OWL', label:'계산형', raise:0, size:1, bluff:.8, loose:-.03, peek:.6,
+    lines:{ memo:['확률은 거짓말을 하지 않죠.'], call:['팟 오즈가 맞습니다. 콜.'], raise:['기댓값이 양수입니다. 레이즈.'],
+      fold:['기댓값이 음수군요. 다이.'], win:['계산대로입니다.'], lose:['분산이란 게 있죠.'], peek:['정보에는 가치가 있죠.'] },
+    emo:{ win:['🤓'], lose:['🤔'], reply:['🤔','🤓'], allin:'🤓' } },
+  { id:'gambler', icon:'🎲', name:'THE GAMBLER', label:'도박꾼', raise:.1, size:1.5, bluff:1.5, loose:.16, peek:.25,
+    lines:{ memo:['운도 실력이에요!'], call:['콜! 일단 가 보죠!'], raise:['느낌이 와요! 레이즈!'], allin:['올인! 가즈아!'],
+      fold:['…아 이건 진짜 아니다.'], win:['역시 오늘은 운이 좋아!'], lose:['다음 판은 무조건 내 거야!'], peek:['한 장만, 딱 한 장만 볼게요.'] },
+    emo:{ win:['🤑','🔥'], lose:['😭'], reply:['🤑','😆','🙏'], allin:'🎲' } }
+];
 
 /* ============================================================
    STATE
@@ -561,8 +633,12 @@ const S = {
   grid:[], comm:[], rest:[], pPick:[], aPick:[], ai:null, bet:null, result:null,
   timer:null, timeouts:[], raiseTo:0,
   mode:'ai', ready:{p:false,a:false}, conf:{p:false,a:false}, nextReady:{p:false,a:false},
-  ev:null, evId:0, oppPeer:null, oppOnline:false, seq:0, memoEnd:0, memoTotal:0
+  ev:null, evId:0, oppPeer:null, oppOnline:false, seq:0, memoEnd:0, memoTotal:0,
+  rule:'classic', nextRule:'classic', street:1, commShown:3,
+  peeks:{p:0,a:0}, peekRound:{p:false,a:false}, peekMode:false, pk:null, persona:null
 };
+const PER = () => S.persona || PERSONAS[0];
+const line = k => rnd((S.persona && S.persona.lines[k]) || LINES[k]);
 const OPP = () => S.mode==='ai' ? 'AI' : '상대';
 const DUMMY = {r:2,s:'s',id:'s2'};
 const $ = s => document.querySelector(s);
@@ -656,8 +732,9 @@ function hud(){
   const set=(id,v)=>{ const el=$(id); const t=fmt(v); if(el.textContent!==t){ el.textContent=t; el.classList.add('bump'); setTimeout(()=>el.classList.remove('bump'),250);} };
   set('#sRound',S.round); set('#sPot',S.pot); set('#sMe',S.chips.p); set('#sAi',S.chips.a);
   $('#lblOpp').textContent = OPP()+' 칩';
-  $('#aiName').textContent = S.mode==='ai' ? 'THE DEALER' : 'OPPONENT';
-  $('#aiSub').textContent = S.mode==='ai' ? DIFF[S.diff].label : `방 ${roomCode}${S.mode==='host'&&!S.oppOnline?' · 대기':''}`;
+  const P=S.persona, dbl=S.rule==='double'?' · 더블':'';
+  $('#aiName').textContent = S.mode==='ai' ? (P ? `${P.icon} ${P.name}` : 'THE DEALER') : 'OPPONENT';
+  $('#aiSub').textContent = S.mode==='ai' ? (P?P.label+' · ':'')+DIFF[S.diff].label+dbl : `방 ${roomCode}${S.mode==='host'&&!S.oppOnline?' · 대기':''}${dbl}`;
 }
 function speak(t){ const el=$('#speech'); el.textContent=t; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 function log(t, cls=''){
@@ -688,14 +765,19 @@ function startRound(){
   if (S.mode==='guest') return;
   clearLater(); clearInterval(S.timer);
   if (S.chips.p < ANTE || S.chips.a < ANTE){ if(S.mode==='host'){ S.phase='over'; pushState(); } return gameOver(); }
-  S.diff = S.nextDiff;
+  S.diff = S.nextDiff; S.rule = S.nextRule;
+  const newPersona = S.mode==='ai' && (!S.persona || S.round===0);
+  if (newPersona) S.persona = rnd(PERSONAS);
   S.round++;
   const deck = newDeck();
   S.grid = deck.slice(0,16); S.comm = deck.slice(16,19); S.rest = deck.slice(19);
   S.pPick=[]; S.aPick=[]; S.ai=null; S.bet=null; S.result=null;
   S.ready={p:false,a:false}; S.conf={p:false,a:false}; S.nextReady={p:false,a:false}; S.memoEnd=0;
+  S.street=1; S.commShown = S.rule==='double' ? 2 : 3;
+  S.peekRound={p:false,a:false}; S.peekMode=false; S.pk=null; peekingIdx=-1; clearTimeout(peekTimer);
   S.chips.p -= ANTE; S.chips.a -= ANTE; S.pot = ANTE*2;
-  log(`라운드 시작 · 앤티 ${ANTE} (난이도 ${DIFF[S.diff].label})`,'g');
+  log(`라운드 시작 · 앤티 ${ANTE} (난이도 ${DIFF[S.diff].label}${S.rule==='double'?' · 더블 베팅':''})`,'g');
+  if (newPersona){ log(`오늘의 상대: ${S.persona.icon} ${S.persona.name} — ${S.persona.label}`,'a'); toast(`상대 성격: ${S.persona.icon} ${S.persona.label}`); }
 
   gridEl.className='grid'; gridEl.innerHTML=''; gridEls=[];
   S.grid.forEach((c,i)=>{ const el=cardEl(c,true); el.dataset.i=i; el.addEventListener('click',()=>onGridClick(i)); gridEl.appendChild(el); gridEls.push(el); });
@@ -705,7 +787,7 @@ function startRound(){
   if (window.innerWidth<=980) window.scrollTo({top:0,behavior:'smooth'});
   S.phase='memorize'; hud(); renderControls(); setTimerUI(0,0);
   $('#gridLabel').textContent='카드가 공개됩니다…';
-  speak(rnd(LINES.memo)); flash('기억하라');
+  speak(S.mode==='ai' ? line('memo') : rnd(LINES.memo)); flash('기억하라');
   gridEls.forEach((el,i)=> later(()=>setDown(el,false), 120 + i*45));
   later(()=>{ if(S.phase==='memorize'){ $('#gridLabel').textContent='위치와 카드를 기억하세요!'; startTimer(DIFF[S.diff].time); } }, 120 + 16*45 + 550);
   pushState();
@@ -727,20 +809,22 @@ function endMemorize(){
   clearInterval(S.timer); clearLater(); setTimerUI(0,0);
   S.phase='select';
   gridEls.forEach((el,i)=> later(()=>setDown(el,true), (15-i)*25));
-  commEls.forEach((el,i)=> later(()=>setDown(el,false), 650 + i*180));
+  commEls.forEach((el,i)=>{ if(i<S.commShown) later(()=>setDown(el,false), 650 + i*180); });
   later(()=>{ gridEl.classList.add('selecting'); }, 500);
   $('#gridLabel').textContent='기억한 카드 2장을 선택하세요';
   flash('2장 선택');
   if (S.mode==='ai'){
-    aiChoose(); speak(rnd(LINES.think));
-    later(()=>{ if(S.phase==='select'||S.phase==='bet'){ setAiPicks(true); speak(rnd(LINES.select)); } }, 1700);
+    aiChoose(); speak(line('think'));
+    if (S.ai.peeked) later(()=>{ if(S.phase==='select'||S.phase==='bet'){ speak(line('peek')); log(`AI: 엿보기 👁 (-${S.ai.peeked})`,'a'); hud(); } }, 800);
+    later(()=>{ if(S.phase==='select'||S.phase==='bet'){ setAiPicks(true); speak(line('select')); } }, S.ai.peeked?2300:1700);
   }
-  log('암기 종료 · 공유 카드 공개: '+S.comm.map(cardName).join(' '));
+  log('암기 종료 · 공유 카드 공개: '+S.comm.slice(0,S.commShown).map(cardName).join(' ')+(S.commShown<3?' (+1장 비공개)':''));
   renderControls(); pushState();
 }
 
 function onGridClick(i){
   if (S.phase!=='select' || S.conf.p) return;
+  if (S.peekMode) return doPeek(i);
   const k=S.pPick.indexOf(i);
   if (k>-1) S.pPick.splice(k,1);
   else { if (S.pPick.length>=2) S.pPick.shift(); S.pPick.push(i); }
@@ -755,8 +839,32 @@ function paintPicks(){
   });
 }
 
+/* ---------- 엿보기 ---------- */
+let peekingIdx=-1, peekTimer=null, pendingPeek=0, lastPkId=0;
+const peekLeft = w => PEEK_MAX - S.peeks[w];
+const peekCost = w => PEEK_COST(S.peeks[w]);
+function canPeek(w){ return S.phase==='select' && !S.conf[w] && !S.peekRound[w] && S.peeks[w]<PEEK_MAX && S.chips[w]>=peekCost(w); }
+function payPeek(w){ const c=peekCost(w); S.chips[w]-=c; S.peeks[w]++; S.peekRound[w]=true; return c; }
+function setPeekMode(on){ S.peekMode=!!on; gridEl.classList.toggle('peek-mode',S.peekMode); }
+function showPeek(i,c){
+  const el=gridEls[i]; if(!el) return;
+  if (c) setFace(el,c);
+  clearTimeout(peekTimer); peekingIdx=i;
+  el.classList.add('peeking'); setDown(el,false);
+  peekTimer=setTimeout(()=>{ peekingIdx=-1; el.classList.remove('peeking'); if(S.phase==='select'||S.phase==='bet') setDown(el,true); },1500);
+}
+function doPeek(i){
+  setPeekMode(false);
+  if (!canPeek('p')) return renderControls();
+  if (S.mode==='guest'){ pendingPeek=S.round; S.peekRound.p=true; sendAct({type:'peek',i}); renderControls(); return; }
+  const cost=payPeek('p'); showPeek(i);
+  log(`나: 엿보기 👁 (-${cost})`,'p'); toast(`👁 -${fmt(cost)}칩 · 남은 엿보기 ${peekLeft('p')}회`);
+  say('p','peek',cost); hud(); renderControls(); pushState();
+}
+
 function confirmSelection(){
   if (S.phase!=='select' || S.pPick.length!==2 || S.conf.p) return;
+  setPeekMode(false);
   gridEl.classList.remove('selecting');
   if (S.mode==='guest'){ S.conf.p=true; pending={type:'pick',picks:S.pPick.slice()}; sendAct(pending); renderControls(); return; }
   if (S.mode==='host'){ S.conf.p=true; if(S.conf.a) startBetting(); else { renderControls(); pushState(); } return; }
@@ -771,8 +879,32 @@ function confirmSelection(){
    ============================================================ */
 function neighbors(i){ const r=Math.floor(i/4), c=i%4, n=[]; if(r>0)n.push(i-4); if(r<3)n.push(i+4); if(c>0)n.push(i-1); if(c<3)n.push(i+1); return n; }
 
+/* 공유 카드가 2장뿐이면(더블 1차) 3번째 카드를 샘플링해 평균 강도로 평가 */
+function thirdSamples(comm){
+  const pool=[S.comm[2],...S.rest].filter(Boolean);
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  return pool.slice(0,12).map(c=>[...comm,c]);
+}
+function aiPairs(belief, comm){
+  const sets = comm.length>=3 ? [comm.slice(0,3)] : thirdSamples(comm);
+  const pairs=[];
+  for(let i=0;i<16;i++) for(let j=i+1;j<16;j++){
+    if(!belief[i]||!belief[j]) continue;
+    if (sets.length===1){ const ev=evaluate5([belief[i],belief[j],...sets[0]]); pairs.push({i,j,ev,v:handVal(ev),abs:absStrength(ev)}); }
+    else { let sum=0; for(const st of sets) sum+=absStrength(evaluate5([belief[i],belief[j],...st])); const a=sum/sets.length; pairs.push({i,j,ev:null,v:a,abs:a}); }
+  }
+  return pairs.sort((a,b)=>b.v-a.v);
+}
+function choosePick(pairs, d){
+  if (!pairs.length){
+    const a=Math.floor(Math.random()*16); let b; do{ b=Math.floor(Math.random()*16);}while(b===a);
+    return {pick:{i:a,j:b,ev:{cat:0,tb:[7],name:HAND_NAMES[0]},abs:.2}, idx:0};
+  }
+  if (Math.random()<d.noise){ const idx=Math.floor(Math.random()*Math.min(6,pairs.length)); return {pick:pairs[idx],idx}; }
+  const top=pairs.filter(p=>p.v===pairs[0].v); return {pick:rnd(top), idx:0};
+}
 function aiChoose(){
-  const d=DIFF[S.diff];
+  const d=DIFF[S.diff], P=PER();
   const belief = S.grid.map((c,i)=>{
     if (Math.random()<d.acc) return c;                   // 정확한 기억
     const x=Math.random();
@@ -780,46 +912,61 @@ function aiChoose(){
     if (x<.75) return rnd(S.rest);                       // 잘못된 기억(거짓 기억)
     return null;                                          // 기억 안 남
   });
-  const pairs=[];
-  for(let i=0;i<16;i++) for(let j=i+1;j<16;j++){
-    if(!belief[i]||!belief[j]) continue;
-    const ev=evaluate5([belief[i],belief[j],...S.comm]);
-    pairs.push({i,j,ev,v:handVal(ev)});
-  }
-  pairs.sort((a,b)=>b.v-a.v);
-  let pick, idx=0;
-  if (!pairs.length){
-    const a=Math.floor(Math.random()*16); let b; do{ b=Math.floor(Math.random()*16);}while(b===a);
-    pick={i:a,j:b,ev:{cat:0,tb:[7],name:HAND_NAMES[0]}};
-  } else if (Math.random()<d.noise){
-    idx=Math.floor(Math.random()*Math.min(6,pairs.length)); pick=pairs[idx];
-  } else {
-    const top=pairs.filter(p=>p.v===pairs[0].v); pick=rnd(top); idx=0;
+  const comm=S.comm.slice(0,S.commShown);
+  let pairs=aiPairs(belief,comm), {pick,idx}=choosePick(pairs,d), peeked=0;
+  // 엿보기: 성격별 확률, 칩 여유가 있을 때만. 고른 2장 중 1장을 확인하고 틀렸으면 다시 고름
+  if (canPeek('a') && S.chips.a > peekCost('a') + ANTE*4 && Math.random() < P.peek*.75){
+    const k = Math.random()<.5 ? pick.i : pick.j;
+    peeked = payPeek('a');
+    if (belief[k]!==S.grid[k]){ belief[k]=S.grid[k]; pairs=aiPairs(belief,comm); ({pick,idx}=choosePick(pairs,d)); }
   }
   const pct = pairs.length ? 1 - idx/pairs.length : .3;
-  S.ai = { belief, ev:pick.ev, strength: .6*absStrength(pick.ev) + .4*pct, bluffed:false };
+  S.ai = { belief, ev:pick.ev, strength: .6*pick.abs + .4*pct - (comm.length<3?.03:0), bluffed:false, peeked };
   S.aPick=[pick.i,pick.j];
+}
+/* 더블 2차: 3번째 공유 카드가 나온 뒤 자기 패를 다시 평가 */
+function aiRecalc(){
+  if (!S.ai) return;
+  const [i,j]=S.aPick, bl=S.ai.belief;
+  if (!bl[i]||!bl[j]){ S.ai.strength*=.9; return; }
+  const pairs=aiPairs(bl,S.comm), idx=pairs.findIndex(p=>p.i===i&&p.j===j);
+  const ev=evaluate5([bl[i],bl[j],...S.comm]);
+  S.ai.ev=ev; S.ai.strength = .6*absStrength(ev) + .4*(idx<0?.4:1-idx/pairs.length);
 }
 
 /* ============================================================
    BETTING
    ============================================================ */
-function startBetting(){
-  S.phase='bet'; flash('베팅');
+function newBetStreet(){
   S.bet = { c:{p:0,a:0}, cur:0, lastRaise:ANTE*2, acted:{p:false,a:false}, raises:0,
             cap:Math.min(S.chips.p,S.chips.a), turn: S.round%2===1 ? 'p' : 'a', lastPlayerRaise:0 };
+}
+function startBetting(){
+  S.phase='bet'; S.street=1; setPeekMode(false); flash(S.rule==='double'?'1차 베팅':'베팅');
+  newBetStreet();
   if (S.bet.cap<=0){ log('추가 베팅 불가 — 바로 쇼다운','g'); renderControls(); return later(()=>showdown(),800); }
-  log(S.bet.turn==='p' ? '이번 라운드는 당신이 먼저 행동합니다' : 'AI가 먼저 행동합니다');
+  log(S.bet.turn==='p' ? '이번 라운드는 당신이 먼저 행동합니다' : `${OPP()}가 먼저 행동합니다`);
+  nextTurn();
+}
+function nextStreet(){
+  if (S.phase!=='bet') return;
+  S.street=2; S.commShown=3;
+  if (commEls[2]) setDown(commEls[2],false);
+  log('3번째 공유 카드 공개: '+cardName(S.comm[2])+' · 2차 베팅','g');
+  flash('2차 베팅');
+  if (S.mode==='ai'){ aiRecalc(); speak(line('street')); }
+  newBetStreet();
+  if (S.bet.cap<=0){ log('추가 베팅 불가 — 바로 쇼다운','g'); S.bet.turn=null; renderControls(); pushState(); return later(()=>showdown(),1000); }
   nextTurn();
 }
 function minRaiseTo(){ const b=S.bet; return Math.min(b.cap, b.cur + b.lastRaise); }
-function canRaise(){ const b=S.bet; return b.cap > b.cur && b.raises < 4; }
+function canRaise(){ const b=S.bet; return b.cap > b.cur && b.raises < RULES[S.rule].maxRaises; }
 
 function nextTurn(){
   const b=S.bet;
   if (b.turn==='p') S.raiseTo = minRaiseTo();
   renderControls();
-  if (b.turn==='a' && S.mode==='ai'){ speak(rnd(LINES.think)); later(aiAct, 900 + Math.random()*900); }
+  if (b.turn==='a' && S.mode==='ai'){ speak(line('think')); later(aiAct, 900 + Math.random()*900); }
   pushState();
 }
 
@@ -854,34 +1001,39 @@ function act(who,type,to){
     if (who==='p') b.lastPlayerRaise = amt;
     log(`${nm}: ${allin?'올인':'레이즈'} → ${fmt(to)}`, who);
     say(who,allin?'allin':'raise',to);
+    if (allin && who==='a' && S.mode==='ai' && Math.random()<.7) later(()=>aiEmote('allin'),350);
   }
   b.acted[who]=true;
-  if (b.acted.p && b.acted.a && b.c.p===b.c.a){ b.turn=null; renderControls(); pushState(); return later(()=>showdown(), 750); }
+  if (b.acted.p && b.acted.a && b.c.p===b.c.a){
+    b.turn=null; renderControls(); pushState();
+    if (S.rule==='double' && S.street===1) return later(nextStreet, 900);
+    return later(()=>showdown(), 750);
+  }
   b.turn = other; nextTurn();
 }
 
 function aiAct(){
   const b=S.bet; if(S.mode!=='ai' || !b || b.turn!=='a' || S.phase!=='bet') return;
-  const d=DIFF[S.diff];
+  const d=DIFF[S.diff], P=PER();
   const toCall=b.cur-b.c.a;
   let s = S.ai.strength*d.acc + .32*(1-d.acc) + (Math.random()-.5)*.08;
   if (toCall>0 && b.lastPlayerRaise > (S.pot - b.lastPlayerRaise)*.8) s -= .05; // 큰 레이즈에 경계
-  const bluff = Math.random() < d.bluff;
+  const bluff = Math.random() < Math.min(.5, d.bluff*P.bluff);
   const r10 = v => Math.round(v/10)*10;
-  const sized = f => Math.max(minRaiseTo(), Math.min(b.cap, r10(b.cur + Math.max(b.lastRaise, S.pot*f))));
+  const sized = f => Math.max(minRaiseTo(), Math.min(b.cap, r10(b.cur + Math.max(b.lastRaise, S.pot*f*P.size))));
   if (toCall===0){
-    if (canRaise() && (s>.74 || (s>.55 && Math.random()<.45) || bluff)){
+    if (canRaise() && (s>.74-P.raise || (s>.55-P.raise && Math.random()<.45) || bluff)){
       if (s<.5) S.ai.bluffed=true;
       return act('a','raise', sized(s>.86?.9:s>.74?.65:.5));
     }
     return act('a','check');
   }
   const potOdds = toCall/(S.pot+toCall);
-  if (canRaise() && ((s>.86 && Math.random()<.55) || (bluff && Math.random()<.35))){
+  if (canRaise() && ((s>.86-P.raise && Math.random()<.55) || (bluff && Math.random()<.35))){
     if (s<.5) S.ai.bluffed=true;
     return act('a','raise', sized(.8));
   }
-  if (s > potOdds + .1 || bluff || (toCall<=ANTE*2 && s>.3)){
+  if (s > potOdds + .1 - P.loose || bluff || (toCall<=ANTE*2 && s>.3-P.loose)){
     if (bluff && s<.45) S.ai.bluffed=true;
     return act('a','call');
   }
@@ -926,11 +1078,14 @@ function showdown(foldWinner){
   for(let i=0;i<16;i++) for(let j=i+1;j<16;j++){ const ev=evaluate5([S.grid[i],S.grid[j],...S.comm]); if(!best||handVal(ev)>handVal(best)) best=ev; }
 
   flash(winner==='p'?'WIN':winner==='a'?'LOSE':'SPLIT');
-  S.result={winner,fold:!!foldWinner,pe,ae,pc,ac,pot,best,believed:S.ai?S.ai.ev:null,bluffed:S.ai?S.ai.bluffed:false};
+  let believed=null;
+  if (S.ai){ const bl=S.ai.belief, [i,j]=S.aPick; if(bl[i]&&bl[j]) believed=evaluate5([bl[i],bl[j],...S.comm]); }
+  S.result={winner,fold:!!foldWinner,pe,ae,pc,ac,pot,best,believed,bluffed:S.ai?S.ai.bluffed:false};
   if (S.mode==='ai'){
-    if (winner==='p') speak(foldWinner?rnd(LINES.fold):rnd(LINES.lose));
-    else if (winner==='a') speak(S.ai.bluffed?rnd(LINES.bluffWin):rnd(LINES.win));
-    else speak(rnd(LINES.tie));
+    if (winner==='p') speak(foldWinner?line('fold'):line('lose'));
+    else if (winner==='a') speak(S.ai.bluffed?line('bluffWin'):line('win'));
+    else speak(line('tie'));
+    if (Math.random()<.65) later(()=>aiEmote(winner==='a'?'win':winner==='p'?'lose':'reply'), 900);
   } else speak(winner==='p'?'이번 판은 당신 승리!':winner==='a'?'상대가 가져갔습니다.':'무승부 — 팟을 나눕니다.');
   hud(); renderControls(); pushState();
 }
@@ -945,7 +1100,8 @@ function gameOver(){
 }
 function resetGame(){
   clearLater(); clearInterval(S.timer);
-  Object.assign(S,{chips:{p:START_CHIPS,a:START_CHIPS},round:0,pot:0,phase:'idle',grid:[],comm:[],pPick:[],aPick:[],ai:null,bet:null,result:null});
+  Object.assign(S,{chips:{p:START_CHIPS,a:START_CHIPS},round:0,pot:0,phase:'idle',grid:[],comm:[],pPick:[],aPick:[],ai:null,bet:null,result:null,
+    persona:null,peeks:{p:0,a:0},peekRound:{p:false,a:false},peekMode:false,street:1,commShown:3});
   gridEl.innerHTML=''; commEl.innerHTML=''; gridEls=[]; commEls=[];
   $('#log').innerHTML=''; setTimerUI(0,0); hud(); renderControls(); renderIdleBoard();
 }
@@ -999,15 +1155,21 @@ function renderControls(){
   else if (p==='select'){
     const n=S.pPick.length;
     if (S.mode!=='ai' && S.conf.p){ el.innerHTML=`<button class="btn wide big" disabled><span class="dots">상대 선택 기다리는 중</span></button>`; return; }
+    const left=peekLeft('p'), cost=peekCost('p'), okPeek=canPeek('p');
+    const pkLab = S.peekRound.p ? '완료' : left<=0 ? '소진' : fmt(cost);
+    const info = S.peekMode ? `<div class="peek-info on">👆 엿볼 카드를 누르세요 · 👁 다시 누르면 취소</div>`
+      : `<div class="peek-info">👁 엿보기 <b>${left}/${PEEK_MAX}</b>회 남음 · ${S.peekRound.p?'이번 라운드 사용함':left<=0?'모두 사용':`이번 비용 <b>${fmt(cost)}</b>칩`} · 라운드당 1회</div>`;
     el.innerHTML=`<div class="row2"><button class="btn ghost icon" data-act="clear" ${n?'':'disabled'} aria-label="초기화">↺</button>
-      <button class="btn emerald wide big" data-act="confirm" ${n===2?'':'disabled'}>${n===2?'확정 ✓':`카드 선택 ${n} / 2`}</button></div>`;
+      <button class="btn ghost peek-btn${S.peekMode?' on':''}" data-act="peek" ${okPeek||S.peekMode?'':'disabled'} aria-label="엿보기">👁<small>${pkLab}</small></button>
+      <button class="btn emerald wide big" data-act="confirm" ${n===2&&!S.peekMode?'':'disabled'}>${n===2?'확정 ✓':`카드 선택 ${n} / 2`}</button></div>${info}`;
   }
   else if (p==='bet'){
     const b=S.bet; const mine=b.turn==='p'; const toCall=b.cur-b.c.p;
     const cr=canRaise() && mine; const minTo=minRaiseTo();
     const rt=Math.max(minTo,Math.min(S.raiseTo||minTo,b.cap));
     const allin=rt===b.cap;
-    el.innerHTML=`<div class="btn-row">
+    const street = S.rule==='double' ? `<div class="street"><span class="${S.street===1?'on':''}">1차 베팅 · 공유 2장</span><span class="${S.street===2?'on':''}">2차 베팅 · 공유 3장</span></div>` : '';
+    el.innerHTML=`${street}<div class="btn-row">
         ${toCall===0
           ? `<button class="btn big" data-act="check" ${mine?'':'disabled'}>체크</button>`
           : `<button class="btn emerald big" data-act="call" ${mine?'':'disabled'}>콜 ${fmt(toCall)}</button>`}
@@ -1027,6 +1189,7 @@ function renderControls(){
     el.innerHTML=`<div class="result-banner ${cls}">${title}${sub?`<small>${sub}</small>`:''}</div>
       ${r.believed && r.believed.cat!==r.ae.cat ? `<span class="chip-note">🌀 AI 착각</span>`:''}
       ${r.bluffed ? `<span class="chip-note">🎭 AI 블러핑</span>`:''}
+      ${S.peekRound.a ? `<span class="chip-note">👁 ${OPP()} 엿보기</span>`:''}
       ${S.mode!=='ai' && S.nextReady.p && !over
         ? `<button class="btn wide big" disabled><span class="dots">상대 기다리는 중</span></button>`
         : `<button class="btn gold wide big" data-act="${over?'over':'next'}">${over?'결과 보기':'다음 라운드 ▶'}</button>`}`;
@@ -1052,6 +1215,7 @@ $('#controls').addEventListener('click', e=>{
     else { S.ready.p=true; pending={type:'ready'}; sendAct(pending); renderControls(); }
   }
   else if (a==='clear'){ S.pPick=[]; paintPicks(); renderControls(); }
+  else if (a==='peek'){ setPeekMode(!S.peekMode && canPeek('p')); renderControls(); }
   else if (a==='confirm') confirmSelection();
   else if (a==='check'||a==='call'||a==='fold'||a==='raise'){
     if (S.mode==='guest'){ if(S.bet&&S.bet.turn==='p'){ sendAct({type:a,to:S.raiseTo}); S.bet.turn='x'; renderControls(); } }
@@ -1083,7 +1247,42 @@ $('#diffPick').addEventListener('click', e=>{
   const b=e.target.closest('[data-d]'); if(!b) return;
   S.nextDiff=S.diff=b.dataset.d; syncDiffPick(); hud();
 });
-function openStart(){ syncDiffPick(); $('#startModal').classList.add('open'); }
+function syncRulePick(){ document.querySelectorAll('#rulePick button').forEach(b=>b.classList.toggle('on',b.dataset.r===S.nextRule)); }
+$('#rulePick').addEventListener('click', e=>{
+  const b=e.target.closest('[data-r]'); if(!b) return;
+  S.nextRule=b.dataset.r; if(S.phase==='idle') S.rule=S.nextRule; syncRulePick(); hud();
+});
+function openStart(){ syncDiffPick(); syncRulePick(); $('#startModal').classList.add('open'); }
+
+/* ============================================================
+   EMOJI REACTIONS
+   ============================================================ */
+let emoCool=0, oppEmoCool=0;
+function floatEmoji(e, who){
+  const anchor = who==='p' ? $('.community') : $('.avatar');
+  const r=anchor.getBoundingClientRect();
+  const el=document.createElement('div'); el.className='float-emo'; el.textContent=e;
+  el.style.left=(r.left + r.width/2 + (Math.random()-.5)*40)+'px';
+  el.style.top=(r.top + Math.min(r.height/2, 40))+'px';
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2000);
+}
+function aiEmote(kind){
+  if (S.mode!=='ai' || !S.persona) return;
+  const em=S.persona.emo; floatEmoji(kind==='allin' ? em.allin : rnd(em[kind]||em.reply), 'a');
+}
+function sendEmo(e){
+  if (!EMOS.includes(e)) return;
+  const now=Date.now(); if (now<emoCool) return; emoCool=now+1200;
+  const bar=$('#reactBar'); bar.classList.add('cool'); bar.classList.remove('open'); setTimeout(()=>bar.classList.remove('cool'),1200);
+  floatEmoji(e,'p');
+  if (S.mode==='host'){ if(NR) NR.emit('mh.emo',{e}).catch(onEmitErr); }
+  else if (S.mode==='guest') sendAct({type:'emo',e});
+  else if (S.persona && Math.random()<.5) setTimeout(()=>aiEmote('reply'), 700+Math.random()*700);
+}
+$('#reactBar').innerHTML = EMOS.map(e=>`<button data-e="${e}" aria-label="리액션 ${e}">${e}</button>`).join('');
+$('#reactBar').addEventListener('click', e=>{ const b=e.target.closest('[data-e]'); if(b) sendEmo(b.dataset.e); });
+$('#reactToggle').addEventListener('click', e=>{ e.stopPropagation(); $('#reactBar').classList.toggle('open'); });
+document.addEventListener('click', e=>{ if(!e.target.closest('#reactBar,#reactToggle')) $('#reactBar').classList.remove('open'); });
 $('#startBtn').addEventListener('click', ()=>{ $('#startModal').classList.remove('open'); startRound(); });
 $('#restartBtn').addEventListener('click', ()=>{
   $('#overModal').classList.remove('open');
@@ -1143,11 +1342,11 @@ const swapN = o => (o&&typeof o==='object') ? {p:+o.a||0,a:+o.p||0} : {p:0,a:0};
 
 function evText(ev){
   const amt=fmt(+ev.amt||0);
-  const t={check:'체크',call:`콜 ${amt}`,raise:`레이즈 → ${amt}`,allin:'올인!',fold:'다이',ready:'다 외웠어요',conf:'2장 골랐어요',next:'다음 라운드 준비 완료',join:'입장했습니다'}[ev.k];
+  const t={check:'체크',call:`콜 ${amt}`,raise:`레이즈 → ${amt}`,allin:'올인!',fold:'다이',ready:'다 외웠어요',conf:'2장 골랐어요',next:'다음 라운드 준비 완료',join:'입장했습니다',peek:`엿보기 👁 (-${amt})`}[ev.k];
   return t ? `상대: ${t}` : '';
 }
 function setEv(who,k,amt){ S.ev={id:++S.evId,who,k,amt:amt||0}; if(who==='a'&&S.mode==='host') speak(evText(S.ev)); }
-function say(who,k,amt){ if(S.mode==='ai'){ if(who==='a') speak(rnd(LINES[k])); } else if(S.mode==='host') setEv(who,k,amt); }
+function say(who,k,amt){ if(S.mode==='ai'){ if(who==='a') speak(line(k)); } else if(S.mode==='host') setEv(who,k,amt); }
 
 function onEmitErr(e){ if(e&&e.code==='not_permitted') toast('참여 권한이 없어요 — 공유할 때 참여 가능 권한이 필요해요'); }
 function onRoomErr(){ toast('연결이 끊겼어요'); }
@@ -1157,9 +1356,11 @@ function pushState(){
   if (S.mode!=='host' || !NR || !S.oppPeer) return;
   const showGrid = ['memorize','showdown','over'].includes(S.phase);
   const showComm = ['select','bet','showdown','over'].includes(S.phase);
+  const allComm = S.phase==='showdown'||S.phase==='over';
   const b=S.bet;
   const st={ v:1, seq:++S.seq, round:S.round, phase:S.phase, diff:S.diff, chips:S.chips, pot:S.pot,
-    grid: showGrid ? S.grid.map(cardStr) : null, comm: showComm ? S.comm.map(cardStr) : null,
+    rule:S.rule, street:S.street, commShown:S.commShown, peeks:S.peeks, peekRound:S.peekRound, pk:S.pk,
+    grid: showGrid ? S.grid.map(cardStr) : null, comm: showComm ? S.comm.map((c,i)=> allComm||i<S.commShown ? cardStr(c) : null) : null,
     memoLeft: S.phase==='memorize' && S.memoEnd ? Math.max(0,S.memoEnd-Date.now()) : null, memoTotal:S.memoTotal,
     ready:S.ready, conf:S.conf, next:S.nextReady,
     bet: b ? {c:b.c,cur:b.cur,lastRaise:b.lastRaise,raises:b.raises,cap:b.cap,turn:b.turn,acted:b.acted} : null,
@@ -1196,9 +1397,18 @@ function onAct(msg){
       else pushState(); break;
     case 'restart':
       if (S.phase==='over') restartPvP(); break;
+    case 'peek': {
+      const i=+d.i;
+      if (Number.isInteger(i) && i>=0 && i<16 && canPeek('a')){
+        const cost=payPeek('a'); S.pk={id:S.round*10+S.peeks.a, r:S.round, i, c:cardStr(S.grid[i])};
+        log(`상대: 엿보기 👁 (-${cost})`,'a'); setEv('a','peek',cost); hud(); renderControls();
+      }
+      pushState(); break; }
+    case 'emo':
+      if (EMOS.includes(d.e) && Date.now()>oppEmoCool){ oppEmoCool=Date.now()+500; floatEmoji(d.e,'a'); } break;
   }
 }
-function restartPvP(){ S.chips={p:START_CHIPS,a:START_CHIPS}; $('#overModal').classList.remove('open'); startRound(); }
+function restartPvP(){ S.chips={p:START_CHIPS,a:START_CHIPS}; S.peeks={p:0,a:0}; $('#overModal').classList.remove('open'); startRound(); }
 
 /* ---------- guest ---------- */
 function setFace(el,c){
@@ -1238,12 +1448,15 @@ function onState(msg){
   applyState(st);
 }
 function applyState(st){
-  const prevPhase=S.phase, prevTurn=S.bet&&S.bet.turn;
+  const prevPhase=S.phase, prevTurn=S.bet&&S.bet.turn, prevStreet=S.street;
   const round=+st.round||0, newRound = round!==S.round;
   S.round=round; S.diff=DIFF[st.diff]?st.diff:'normal'; S.nextDiff=S.diff; $('#diffSel').value=S.diff;
   S.chips=swapN(st.chips); S.pot=+st.pot||0;
   S.ready=swap(st.ready); S.conf=swap(st.conf); S.nextReady=swap(st.next);
+  S.rule=RULES[st.rule]?st.rule:'classic'; S.street=+st.street===2?2:1; S.commShown=Math.max(0,Math.min(3,+st.commShown||3));
+  S.peeks=swapN(st.peeks); S.peekRound=swap(st.peekRound); if (pendingPeek===round) S.peekRound.p=true;
   if (newRound){
+    peekingIdx=-1; clearTimeout(peekTimer); setPeekMode(false);
     buildGuestBoard(); S.pPick=[]; S.aPick=[]; S.result=null; pending=null;
     $('#overModal').classList.remove('open'); setAiPicks(false);
     if (window.innerWidth<=980) window.scrollTo({top:0,behavior:'smooth'});
@@ -1272,9 +1485,14 @@ function applyState(st){
       if (!S._tEnd || Math.abs((S._tEnd-performance.now())-left)>600 || prevPhase!=='memorize') startTimer(tot/1000,left); }
   } else { clearInterval(S.timer); S._tEnd=0; setTimerUI(0,0); }
   if (S.phase==='select'||S.phase==='bet'){
-    gridEls.forEach(el=>setDown(el,true)); commEls.forEach(el=>setDown(el,false));
-    gridEl.className='grid'+(S.phase==='select'&&!S.conf.p?' selecting':'');
+    gridEls.forEach((el,i)=>setDown(el,i!==peekingIdx)); commEls.forEach((el,i)=>setDown(el,i>=S.commShown));
+    gridEl.className='grid'+(S.phase==='select'&&!S.conf.p?' selecting':'')+(S.peekMode?' peek-mode':'');
     paintPicks();
+    const pk=st.pk;
+    if (pk && typeof pk==='object' && +pk.id!==lastPkId && +pk.r===round){
+      lastPkId=+pk.id; const c=strCard(pk.c), i=+pk.i;
+      if (c && Number.isInteger(i) && i>=0 && i<16 && S.phase==='select'){ showPeek(i,c); log(`나: 엿보기 👁`,'p'); toast(`👁 엿보기 · 남은 ${peekLeft('p')}회`); }
+    }
   }
   if ((S.phase==='showdown'||S.phase==='over') && st.res && !S.result){
     const mine=validPicks(st.res.ap), opp=validPicks(st.res.pp);
@@ -1291,9 +1509,9 @@ function applyState(st){
   if (prevPhase!==S.phase){
     if (S.phase==='memorize') { flash('기억하라'); speak('집중하세요. 시간은 짧습니다.'); }
     if (S.phase==='select') flash('2장 선택');
-    if (S.phase==='bet') flash('베팅');
+    if (S.phase==='bet') flash(S.rule==='double'?'1차 베팅':'베팅');
     if (S.phase==='over') gameOver();
-  }
+  } else if (S.phase==='bet' && S.street===2 && prevStreet===1) flash('2차 베팅');
   if (st.ev && typeof st.ev==='object' && +st.ev.id!==lastEvId){ lastEvId=+st.ev.id; if(st.ev.who==='p'){ const t=evText(st.ev); if(t) speak(t); } }
   hud(); renderControls();
 }
@@ -1310,8 +1528,9 @@ function setModeTab(m){
 function resetForPvp(mode){
   clearLater(); clearInterval(S.timer); clearInterval(pushTimer); clearInterval(helloTimer);
   Object.assign(S,{mode, chips:{p:START_CHIPS,a:START_CHIPS}, round:0, pot:0, phase:'idle', pPick:[], aPick:[], ai:null, bet:null, result:null,
-    ready:{p:false,a:false}, conf:{p:false,a:false}, nextReady:{p:false,a:false}, ev:null, oppPeer:null, oppOnline:false});
-  hostPeer=null; lastSeq=-1; lastEvId=0; pending=null;
+    ready:{p:false,a:false}, conf:{p:false,a:false}, nextReady:{p:false,a:false}, ev:null, oppPeer:null, oppOnline:false,
+    persona:null, peeks:{p:0,a:0}, peekRound:{p:false,a:false}, peekMode:false, pk:null, street:1, commShown:3});
+  hostPeer=null; lastSeq=-1; lastEvId=0; pending=null; pendingPeek=0; lastPkId=0;
   $('#diffSel').disabled = mode==='guest';
   setAiPicks(false); hud(); renderControls();
 }
@@ -1417,6 +1636,7 @@ async function joinRoomInner(){
   pvpNote('');
   roomCode=code; resetForPvp('guest');
   NR.on('mh.state',onState,onRoomErr);
+  NR.on('mh.emo',m=>{ if(m.isMe || (hostPeer && m.peer!==hostPeer)) return; const e=m.data&&m.data.e; if(EMOS.includes(e) && Date.now()>oppEmoCool){ oppEmoCool=Date.now()+500; floatEmoji(e,'a'); } },onRoomErr);
   NR.onPeers(ch=>{ if(hostPeer && ch.left.some(p=>p.peer===hostPeer)){ speak('방장 연결이 끊겼습니다.'); toast('방장 연결이 끊겼어요'); } }, onRoomErr);
   const hello=()=>{ if(NR) NR.emit('mh.hello',{v:1}).catch(onEmitErr); };
   hello(); helloTimer=setInterval(hello,1500);
